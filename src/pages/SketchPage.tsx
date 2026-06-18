@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { getSketch } from "../sketches";
 import { SketchCanvas } from "../components/SketchCanvas";
 import { MetaPanel } from "../components/MetaPanel";
+import { NativeCodePanel } from "../components/NativeCodePanel";
 import { NotFoundPage } from "./NotFoundPage";
 
 /** Runs a single sketch (auto-start) and shows its five metadata fields (FR-006/FR-007). */
@@ -27,6 +28,7 @@ export function SketchPage() {
           <h2 className="mb-4 text-sm font-semibold text-muted">Metadata</h2>
           <MetaPanel meta={sketch.meta} />
         </div>
+        <NativeCodePanel sketchId={sketch.meta.id} loadSource={sketch.loadSource} />
       </div>
     </div>
   );

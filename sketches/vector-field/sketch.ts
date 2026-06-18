@@ -14,7 +14,7 @@ export default function sketch(p: p5): void {
   let cols: number, rows: number;
 
   p.setup = () => {
-    p.createCanvas(1200, 1200);
+    p.createCanvas(p.windowWidth, p.windowHeight);
     cols = p.floor(p.width / SPACING);
     rows = p.floor(p.height / SPACING);
     p.strokeCap(p.ROUND);
@@ -52,5 +52,11 @@ export default function sketch(p: p5): void {
         p.line(x, y, x + toMouse.x, y + toMouse.y);
       }
     }
+  };
+
+  p.windowResized = () => {
+    p.resizeCanvas(p.windowWidth, p.windowHeight);
+    cols = p.floor(p.width / SPACING);
+    rows = p.floor(p.height / SPACING);
   };
 }

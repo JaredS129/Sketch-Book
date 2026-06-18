@@ -43,3 +43,49 @@ body {
 canvas {
   display: block;
 }
+
+/*
+ * Prism syntax-highlighting theme for the Native p5.js panel (feature 002).
+ * Token colors are mapped to the app's dark palette for visual consistency
+ * (research D3, native-output-panel.md "Accessibility & theming").
+ */
+code[class*="language-"],
+pre[class*="language-"] {
+  color: var(--color-fg);
+  white-space: pre;
+  tab-size: 2;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+.token.punctuation {
+  color: var(--color-muted);
+}
+
+.token.keyword,
+.token.boolean,
+.token.operator {
+  color: var(--color-accent);
+}
+
+.token.function,
+.token.class-name {
+  color: #7fd1ff;
+}
+
+.token.string,
+.token.template-string,
+.token.regex {
+  color: #8ce99a;
+}
+
+.token.number,
+.token.constant {
+  color: #ffb86b;
+}
