@@ -24,11 +24,11 @@ export function SketchPage() {
 
       <div className="space-y-6">
         <SketchCanvas sketchId={sketch.meta.id} load={sketch.load} />
+        <NativeCodePanel sketchId={sketch.meta.id} loadSource={sketch.loadSource} />
         <div>
           <h2 className="mb-4 text-sm font-semibold text-muted">Metadata</h2>
           <MetaPanel meta={sketch.meta} />
         </div>
-        <NativeCodePanel sketchId={sketch.meta.id} loadSource={sketch.loadSource} />
       </div>
     </div>
   );
