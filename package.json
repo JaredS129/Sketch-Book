@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "create-sketch": "tsx scripts/create-sketch.ts",
+    "duplicate-sketch": "tsx scripts/duplicate-sketch.ts",
     "delete-sketch": "tsx scripts/delete-sketch.ts",
     "update-sketch-meta": "tsx scripts/update-sketch-meta.ts"
   },

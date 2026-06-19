@@ -45,6 +45,7 @@ export default function sketch(p: p5) {
 | `npm run build` | Type-check + production build |
 | `npm run preview` | Serve the production build |
 | `npm run create-sketch -- "<name>"` | Scaffold a new sketch (captures `createdBy` from `git config user.name`) |
+| `npm run duplicate-sketch -- "<source name\|id>" ["<new name>"]` | Copy a sketch's folder; new name defaults to `"<source> - Copy"` |
 | `npm run delete-sketch -- "<name>"` | Hard-delete a sketch folder |
 | `npm run update-sketch-meta` | (CI) refresh `dateUpdated`/`lastUpdatedBy` from git history |
 | `npm test` | Run the Vitest suite |
