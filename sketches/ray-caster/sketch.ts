@@ -69,7 +69,37 @@ export default function sketch(p: p5): void {
   const isFieldPositionWithinWall = (x: number, y: number): boolean => {
     const blockX = Math.ceil(x / BLOCK_SIZE + 0.5);
     const blockY = Math.ceil(y / BLOCK_SIZE + 0.5);
+    if (blockY < 0 || blockY >= MAP.length || blockX < 0 || blockX >= MAP[0].length) {
+      return true;
+    }
     return MAP[blockY][blockX] === W;
+  };
+
+  const angleIncrementPerRay: number = ((FOV / HORIZONTAL_RESOLUTION) * Math.PI) / 180;
+  const halfFovRad: number = ((FOV / 2) * Math.PI) / 180;
+
+  const tryMove = (dir: number) => {
+    const newX =
+      player.currentFieldPositionX + Math.cos(player.angle) * MOVE_SPEED * dir;
+    const newY =
+      player.currentFieldPositionY + Math.sin(player.angle) * MOVE_SPEED * dir;
+    if (!isFieldPositionWithinWall(newX, newY)) {
+      player.currentFieldPositionX = newX;
+      player.currentFieldPositionY = newY;
+    }
+  };
+
+  const getRayLength = (cosAngle: number, sinAngle: number): number => {
+    let rayLength: number = 0;
+    while (
+      !isFieldPositionWithinWall(
+        player.currentFieldPositionX + cosAngle * rayLength,
+        player.currentFieldPositionY + sinAngle * rayLength,
+      )
+    ) {
+      rayLength += 4;
+    }
+    return rayLength;
   };
 
   p.draw = () => {
@@ -101,56 +131,30 @@ export default function sketch(p: p5): void {
       player.angle += ROTATION_SPEED;
     }
 
-    const tryMove = (dir: number) => {
-      const newX =
-        player.currentFieldPositionX + Math.cos(player.angle) * MOVE_SPEED * dir;
-      const newY =
-        player.currentFieldPositionY + Math.sin(player.angle) * MOVE_SPEED * dir;
-
-      const newPlayerPositionIsWithinWall = isFieldPositionWithinWall(newX, newY);
-
-      if (!newPlayerPositionIsWithinWall) {
-        player.currentFieldPositionX = newX;
-        player.currentFieldPositionY = newY;
-      }
-    };
-
     if (p.keyIsDown(p.UP_ARROW) || p.keyIsDown(87)) tryMove(1);
     if (p.keyIsDown(p.DOWN_ARROW) || p.keyIsDown(83)) tryMove(-1);
 
-    const getRayLength = (rayAngle: number): number => {
-      let rayLength: number = 0;
-      while (
-        !isFieldPositionWithinWall(
-          player.currentFieldPositionX + Math.cos(rayAngle) * rayLength,
-          player.currentFieldPositionY + Math.sin(rayAngle) * rayLength,
-        )
-      ) {
-        rayLength += 1;
-      }
-      return rayLength;
-    };
-
-    const angleIncrementPerRay: number = ((FOV / HORIZONTAL_RESOLUTION) * Math.PI) / 180;
-    const halfFovRad: number = (FOV / 2 * Math.PI) / 180;
+    const rayEndpoints: number[][] = [];
 
     for (let i = 0; i < HORIZONTAL_RESOLUTION; i++) {
       const angle: number = player.angle - halfFovRad + i * angleIncrementPerRay;
-      const rayLength: number = getRayLength(angle);
-      const rayCanvasPosition = getCanvasPositionFromFieldPosition(
-        player.currentFieldPositionX + Math.cos(angle) * rayLength,
-        player.currentFieldPositionY + Math.sin(angle) * rayLength,
+      const cosAngle = Math.cos(angle);
+      const sinAngle = Math.sin(angle);
+      const rayLength: number = getRayLength(cosAngle, sinAngle);
+      rayEndpoints.push(
+        getCanvasPositionFromFieldPosition(
+          player.currentFieldPositionX + cosAngle * rayLength,
+          player.currentFieldPositionY + sinAngle * rayLength,
+        ),
       );
-      p.push();
-      p.stroke(255, 255, 0);
-      p.strokeWeight(1);
-      p.line(
-        playerCanvasPostion[0],
-        playerCanvasPostion[1],
-        rayCanvasPosition[0],
-        rayCanvasPosition[1],
-      );
-      p.pop();
     }
+
+    p.push();
+    p.stroke(255, 255, 0);
+    p.strokeWeight(1);
+    for (const [x, y] of rayEndpoints) {
+      p.line(playerCanvasPostion[0], playerCanvasPostion[1], x, y);
+    }
+    p.pop();
   };
 }
