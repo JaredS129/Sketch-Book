@@ -22,7 +22,7 @@ export default function sketch(p: p5): void {
 
   const BLOCK_SIZE: number = 50;
   const HORIZONTAL_RESOLUTION: number = 640;
-  const FOV: number = 70;
+  const FOV: number = 60;
   const ROTATION_SPEED: number = 0.04;
   const MOVE_SPEED: number = 1;
   const WALL_COLOR: string = "#0B0B8C";
@@ -109,7 +109,7 @@ export default function sketch(p: p5): void {
         player.currentFieldPositionY + sinAngle * rayLength,
       )
     ) {
-      rayLength += 4;
+      rayLength += 1;
     }
     return rayLength;
   };
@@ -136,7 +136,7 @@ export default function sketch(p: p5): void {
       const sinAngle = Math.sin(angle);
       const rayLength: number = getRayLength(cosAngle, sinAngle);
 
-      const perpendicularRayLength = rayLength * Math.cos(angle - player.angle);
+      const perpendicularRayLength = rayLength * Math.acos(angle - player.angle);
       const wallStripHeight: number = (BLOCK_SIZE * p.height) / perpendicularRayLength;
       const brightness = Math.min(1, wallStripHeight / p.height);
       p.fill(wallColorR * brightness, wallColorG * brightness, wallColorB * brightness);
