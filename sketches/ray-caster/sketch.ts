@@ -22,6 +22,7 @@ export default function sketch(p: p5): void {
 
   const BLOCK_SIZE: number = 100;
   const HORIZONTAL_RESOLUTION: number = 320;
+  const FOV: number = 90;
   const ROTATION_SPEED: number = 0.04;
   const MOVE_SPEED: number = 1;
 
@@ -117,14 +118,12 @@ export default function sketch(p: p5): void {
     if (p.keyIsDown(p.UP_ARROW) || p.keyIsDown(87)) tryMove(1);
     if (p.keyIsDown(p.DOWN_ARROW) || p.keyIsDown(83)) tryMove(-1);
 
-    // draw a yellow line from player position at the players angle until it meets a wall
-
-    const getRayLength = (): number => {
+    const getRayLength = (rayAngle: number): number => {
       let rayLength: number = 0;
       while (
         !isFieldPositionWithinWall(
-          player.currentFieldPositionX + Math.cos(player.angle) * rayLength,
-          player.currentFieldPositionY + Math.sin(player.angle) * rayLength,
+          player.currentFieldPositionX + Math.cos(rayAngle) * rayLength,
+          player.currentFieldPositionY + Math.sin(rayAngle) * rayLength,
         )
       ) {
         rayLength += 1;
@@ -132,21 +131,26 @@ export default function sketch(p: p5): void {
       return rayLength;
     };
 
-    const rayLength: number = getRayLength();
-    const rayCanvasPosition = getCanvasPositionFromFieldPosition(
-      player.currentFieldPositionX + Math.cos(player.angle) * rayLength,
-      player.currentFieldPositionY + Math.sin(player.angle) * rayLength,
-    );
+    const angleIncrementPerRay: number = ((FOV / HORIZONTAL_RESOLUTION) * Math.PI) / 180;
+    const halfFovRad: number = (FOV / 2 * Math.PI) / 180;
 
-    p.push();
-    p.stroke(255, 255, 0);
-    p.strokeWeight(1);
-    p.line(
-      playerCanvasPostion[0],
-      playerCanvasPostion[1],
-      rayCanvasPosition[0],
-      rayCanvasPosition[1],
-    );
-    p.pop();
+    for (let i = 0; i < HORIZONTAL_RESOLUTION; i++) {
+      const angle: number = player.angle - halfFovRad + i * angleIncrementPerRay;
+      const rayLength: number = getRayLength(angle);
+      const rayCanvasPosition = getCanvasPositionFromFieldPosition(
+        player.currentFieldPositionX + Math.cos(angle) * rayLength,
+        player.currentFieldPositionY + Math.sin(angle) * rayLength,
+      );
+      p.push();
+      p.stroke(255, 255, 0);
+      p.strokeWeight(1);
+      p.line(
+        playerCanvasPostion[0],
+        playerCanvasPostion[1],
+        rayCanvasPosition[0],
+        rayCanvasPosition[1],
+      );
+      p.pop();
+    }
   };
 }
