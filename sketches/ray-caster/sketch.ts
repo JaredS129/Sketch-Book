@@ -20,11 +20,12 @@ export default function sketch(p: p5): void {
     [W, W, W, W, W, W],
   ];
 
-  const BLOCK_SIZE: number = 100;
-  const HORIZONTAL_RESOLUTION: number = 320;
-  const FOV: number = 90;
+  const BLOCK_SIZE: number = 50;
+  const HORIZONTAL_RESOLUTION: number = 640;
+  const FOV: number = 70;
   const ROTATION_SPEED: number = 0.04;
   const MOVE_SPEED: number = 1;
+  const WALL_COLOR: string = "#0B0B8C";
 
   interface PlayerProps {
     startingMapPositionX: number;
@@ -56,14 +57,25 @@ export default function sketch(p: p5): void {
     startingAngle: 180,
   });
 
-  p.setup = () => {
-    p.createCanvas(1200, 1200);
-  };
+  let backgroundBuffer: p5.Graphics;
+  let wallColorR: number;
+  let wallColorG: number;
+  let wallColorB: number;
 
-  const getCanvasPositionFromFieldPosition = (x: number, y: number): number[] => {
-    const canvasX = x + BLOCK_SIZE * 2 - BLOCK_SIZE / 2;
-    const canvasY = y + BLOCK_SIZE * 2 - BLOCK_SIZE / 2;
-    return [canvasX, canvasY];
+  p.setup = () => {
+    p.createCanvas(HORIZONTAL_RESOLUTION, HORIZONTAL_RESOLUTION);
+    wallStripWidth = p.width / HORIZONTAL_RESOLUTION;
+    const parsedWallColor = p.color(WALL_COLOR);
+    wallColorR = p.red(parsedWallColor);
+    wallColorG = p.green(parsedWallColor);
+    wallColorB = p.blue(parsedWallColor);
+
+    backgroundBuffer = p.createGraphics(p.width, p.height);
+    backgroundBuffer.noStroke();
+    backgroundBuffer.fill(70);
+    backgroundBuffer.rect(0, 0, p.width, p.height / 2);
+    backgroundBuffer.fill(130);
+    backgroundBuffer.rect(0, p.height / 2, p.width, p.height / 2);
   };
 
   const isFieldPositionWithinWall = (x: number, y: number): boolean => {
@@ -102,27 +114,10 @@ export default function sketch(p: p5): void {
     return rayLength;
   };
 
+  let wallStripWidth: number;
+
   p.draw = () => {
-    p.background(18);
-
-    for (let i = 0; i < MAP.length; i++) {
-      for (let j = 0; j < MAP[i].length; j++) {
-        if (MAP[i][j] === W) {
-          p.rect(j * BLOCK_SIZE, i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-        }
-      }
-    }
-
-    const playerCanvasPostion = getCanvasPositionFromFieldPosition(
-      player.currentFieldPositionX,
-      player.currentFieldPositionY,
-    );
-
-    p.push();
-    p.translate(playerCanvasPostion[0], playerCanvasPostion[1]);
-    p.rotate(player.angle);
-    p.triangle(8, 0, -4, -5, -4, 5);
-    p.pop();
+    p.image(backgroundBuffer, 0, 0);
 
     if (p.keyIsDown(p.LEFT_ARROW) || p.keyIsDown(65)) {
       player.angle -= ROTATION_SPEED;
@@ -134,27 +129,23 @@ export default function sketch(p: p5): void {
     if (p.keyIsDown(p.UP_ARROW) || p.keyIsDown(87)) tryMove(1);
     if (p.keyIsDown(p.DOWN_ARROW) || p.keyIsDown(83)) tryMove(-1);
 
-    const rayEndpoints: number[][] = [];
-
+    p.noStroke();
     for (let i = 0; i < HORIZONTAL_RESOLUTION; i++) {
       const angle: number = player.angle - halfFovRad + i * angleIncrementPerRay;
       const cosAngle = Math.cos(angle);
       const sinAngle = Math.sin(angle);
       const rayLength: number = getRayLength(cosAngle, sinAngle);
-      rayEndpoints.push(
-        getCanvasPositionFromFieldPosition(
-          player.currentFieldPositionX + cosAngle * rayLength,
-          player.currentFieldPositionY + sinAngle * rayLength,
-        ),
+
+      const perpendicularRayLength = rayLength * Math.cos(angle - player.angle);
+      const wallStripHeight: number = (BLOCK_SIZE * p.height) / perpendicularRayLength;
+      const brightness = Math.min(1, wallStripHeight / p.height);
+      p.fill(wallColorR * brightness, wallColorG * brightness, wallColorB * brightness);
+      p.rect(
+        i * wallStripWidth,
+        (p.height - wallStripHeight) / 2,
+        wallStripWidth,
+        wallStripHeight,
       );
     }
-
-    p.push();
-    p.stroke(255, 255, 0);
-    p.strokeWeight(1);
-    for (const [x, y] of rayEndpoints) {
-      p.line(playerCanvasPostion[0], playerCanvasPostion[1], x, y);
-    }
-    p.pop();
   };
 }
