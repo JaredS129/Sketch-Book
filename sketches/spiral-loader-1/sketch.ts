@@ -13,6 +13,7 @@ export default function sketch(p: p5): void {
   let blurBuff;
 
   p.setup = () => {
+    p.pixelDensity(2);
     p.createCanvas(400, 400);
     p.noFill();
     p.stroke(235);
