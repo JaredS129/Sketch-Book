@@ -81,10 +81,10 @@ export default function sketch(p: p5): void {
   const isFieldPositionWithinWall = (x: number, y: number): boolean => {
     const blockX = Math.ceil(x / BLOCK_SIZE + 0.5);
     const blockY = Math.ceil(y / BLOCK_SIZE + 0.5);
-    if (blockY < 0 || blockY >= MAP.length || blockX < 0 || blockX >= MAP[0].length) {
+    if (blockY < 0 || blockY >= MAP.length || blockX < 0 || blockX >= MAP[0]!.length) {
       return true;
     }
-    return MAP[blockY][blockX] === W;
+    return MAP[blockY]![blockX] === W;
   };
 
   const angleIncrementPerRay: number = ((FOV / HORIZONTAL_RESOLUTION) * Math.PI) / 180;
