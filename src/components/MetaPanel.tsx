@@ -1,4 +1,5 @@
-import type { SketchMeta } from "../../scripts/lib/meta";
+import type { SketchMeta, SketchType } from "../../scripts/lib/meta";
+import { SketchTypeLabel } from "./SketchTypeLabel";
 
 /** The five metadata fields, in display order. Shared by the table + sketch page. */
 export const META_FIELDS = [
@@ -18,7 +19,13 @@ export function MetaPanel({ meta }: { meta: SketchMeta }) {
       {META_FIELDS.map(({ key, label }) => (
         <div key={key} className="contents">
           <dt className="text-muted">{label}</dt>
-          <dd className="font-medium text-fg">{meta[key]}</dd>
+          <dd className="font-medium text-fg">
+            {key === "type" ? (
+              <SketchTypeLabel type={meta.type as SketchType} />
+            ) : (
+              meta[key]
+            )}
+          </dd>
         </div>
       ))}
     </dl>
