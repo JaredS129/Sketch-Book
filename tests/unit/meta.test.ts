@@ -14,6 +14,7 @@ const valid: SketchMeta = {
   createdBy: "Jared Stevenson",
   lastUpdatedBy: "Jared Stevenson",
   type: "p5",
+  tags: [],
 };
 
 describe("parseMeta", () => {

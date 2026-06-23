@@ -5,5 +5,8 @@
   "dateUpdated": "2026-06-22",
   "createdBy": "Jared Stevenson",
   "lastUpdatedBy": "Jared Stevenson",
-  "type": "q5"
+  "type": "q5",
+  "tags": [
+    "example"
+  ]
 }

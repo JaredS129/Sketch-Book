@@ -4,5 +4,10 @@
   "dateCreated": "2026-06-21",
   "dateUpdated": "2026-06-22",
   "createdBy": "Naircol",
-  "lastUpdatedBy": "Naircol"
+  "lastUpdatedBy": "Naircol",
+  "tags": [
+    "loading",
+    "spinner",
+    "processing"
+  ]
 }

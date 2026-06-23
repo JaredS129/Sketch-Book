@@ -5,5 +5,9 @@
   "dateUpdated": "2026-06-22",
   "createdBy": "Jared Stevenson",
   "lastUpdatedBy": "Jared Stevenson",
-  "type": "p5play"
+  "type": "p5play",
+  "tags": [
+    "simulation",
+    "example"
+  ]
 }

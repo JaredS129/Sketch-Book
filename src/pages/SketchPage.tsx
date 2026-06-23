@@ -25,7 +25,7 @@ export function SketchPage() {
     const res = await fetch(`/api/sketches/${sketch!.meta.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: values.name, type: values.type }),
+      body: JSON.stringify({ name: values.name, type: values.type, tags: values.tags }),
     });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error ?? "Failed to edit sketch");
@@ -60,7 +60,7 @@ export function SketchPage() {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="w-fit max-w-full space-y-6">
         <SketchCanvas sketchId={sketch.meta.id} load={sketch.load} runner={runnerFromType(sketch.meta.type)} />
         <NativeCodePanel sketchId={sketch.meta.id} loadSource={sketch.loadSource} runner={runnerFromType(sketch.meta.type)} />
         <div>
@@ -74,7 +74,7 @@ export function SketchPage() {
           mode="edit-name-only"
           title="Edit Sketch"
           submitLabel="Save"
-          initialValues={{ name: sketch.meta.name, type: sketch.meta.type }}
+          initialValues={{ name: sketch.meta.name, type: sketch.meta.type, tags: sketch.meta.tags ?? [] }}
           onSubmit={handleEdit}
           onClose={() => setEditOpen(false)}
         />

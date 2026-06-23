@@ -3,7 +3,7 @@
  * Each test exercises the operations that the middleware delegates to,
  * verifying filesystem state as the contracts/sketch-management-api.md specifies.
  */
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, beforeEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { REPO_ROOT } from "../helpers";
@@ -13,6 +13,13 @@ import { readMeta, writeMeta } from "../../scripts/lib/meta-io";
 import { isValidSlug } from "../../scripts/lib/slug";
 import { SKETCH_TYPES, type SketchType } from "../../scripts/lib/meta";
 import { editSketch } from "../../scripts/lib/edit-sketch-op";
+import {
+  REGISTRY_PATH,
+  readTagRegistry,
+  writeTagRegistry,
+  mergeTags,
+  normaliseTags,
+} from "../../scripts/lib/tags";
 
 const TODAY = "2026-01-01";
 const BASE_META = {
@@ -269,5 +276,87 @@ describe("delete endpoint", () => {
     const result = deleteOp("api-delete-nonexistent");
     expect(result.ok).toBe(false);
     expect(result.error).toMatch(/not found/);
+  });
+});
+
+// ---------- TAG VALIDATION ----------
+
+function validateTagsForApi(rawTags: string[]): { ok: true } | { ok: false; error: string } {
+  for (const tag of rawTags) {
+    if (/\s/.test(String(tag).trim()))
+      return { ok: false, error: `tag '${tag}' must be a single word (no spaces)` };
+  }
+  return { ok: true };
+}
+
+describe("tag validation (API rule: no spaces allowed)", () => {
+  it("accepts a single-word tag", () => {
+    expect(validateTagsForApi(["animation"])).toEqual({ ok: true });
+  });
+
+  it("accepts multiple single-word tags", () => {
+    expect(validateTagsForApi(["animation", "audio", "generative"])).toEqual({ ok: true });
+  });
+
+  it("rejects a tag with a space", () => {
+    const result = validateTagsForApi(["two words"]);
+    expect(result.ok).toBe(false);
+    expect((result as { error: string }).error).toMatch(/must be a single word/);
+  });
+
+  it("rejects a tag with a tab", () => {
+    const result = validateTagsForApi(["bad\ttag"]);
+    expect(result.ok).toBe(false);
+  });
+
+  it("accepts an empty tags array", () => {
+    expect(validateTagsForApi([])).toEqual({ ok: true });
+  });
+});
+
+// ---------- TAG REGISTRY INTEGRATION ----------
+
+describe("tag registry", () => {
+  let savedRegistry: string[] | null = null;
+
+  beforeEach(() => {
+    savedRegistry = fs.existsSync(REGISTRY_PATH)
+      ? (JSON.parse(fs.readFileSync(REGISTRY_PATH, "utf8")) as string[])
+      : null;
+    if (fs.existsSync(REGISTRY_PATH)) fs.unlinkSync(REGISTRY_PATH);
+  });
+
+  afterEach(() => {
+    if (fs.existsSync(REGISTRY_PATH)) fs.unlinkSync(REGISTRY_PATH);
+    if (savedRegistry !== null) writeTagRegistry(savedRegistry);
+  });
+
+  it("GET /api/tags returns [] when registry file is absent", () => {
+    expect(readTagRegistry()).toEqual([]);
+  });
+
+  it("writing then reading round-trips the registry", () => {
+    writeTagRegistry(["animation", "physics"]);
+    expect(readTagRegistry()).toEqual(["animation", "physics"]);
+  });
+
+  it("edit sketch with tags merges into registry", () => {
+    makeSketch("api-tags-edit-src", "Tags Edit Test");
+    writeTagRegistry(["animation"]);
+    const tags = normaliseTags(["physics", "audio"]);
+    editSketch({ id: "api-tags-edit-src", name: "Tags Edit Test", type: "p5", tags });
+    writeTagRegistry(mergeTags(readTagRegistry(), tags));
+    expect(readTagRegistry()).toEqual(["animation", "audio", "physics"]);
+    expect(readMeta("api-tags-edit-src").tags).toEqual(["physics", "audio"]);
+  });
+
+  it("tags removed from a sketch remain in the registry (append-only)", () => {
+    makeSketch("api-tags-rm-src", "Remove Test");
+    writeTagRegistry(["animation", "physics"]);
+    const tags = normaliseTags(["animation"]);
+    editSketch({ id: "api-tags-rm-src", name: "Remove Test", type: "p5", tags });
+    writeTagRegistry(mergeTags(readTagRegistry(), tags));
+    expect(readTagRegistry()).toEqual(["animation", "physics"]);
+    expect(readMeta("api-tags-rm-src").tags).toEqual(["animation"]);
   });
 });

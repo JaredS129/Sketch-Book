@@ -2,7 +2,7 @@ import { Component, useEffect, useRef, useState, type ReactNode } from "react";
 import p5 from "p5";
 import type { Q5SketchModule, SketchModule } from "../sketches";
 
-const CANVAS_CLASS = "max-h-[85vh] overflow-auto rounded-xl border border-edge bg-black";
+const CANVAS_CLASS = "w-fit max-w-full max-h-[85vh] overflow-auto rounded-xl border border-edge bg-black";
 
 /**
  * Mounts a p5 instance-mode sketch and tears it down cleanly on unmount.

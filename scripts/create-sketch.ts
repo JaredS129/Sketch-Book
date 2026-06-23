@@ -82,6 +82,7 @@ function main(): void {
     createdBy,
     lastUpdatedBy: createdBy,
     type,
+    tags: [],
   };
 
   fs.mkdirSync(dir, { recursive: true });

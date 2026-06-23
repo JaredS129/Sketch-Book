@@ -21,6 +21,7 @@ export const SketchMetaSchema = z
     createdBy: z.string().min(1, "createdBy must be non-empty"),
     lastUpdatedBy: z.string().min(1, "lastUpdatedBy must be non-empty"),
     type: z.enum(SKETCH_TYPES).default("p5"),
+    tags: z.array(z.string().min(1)).default([]),
   })
   .strict();
 
@@ -52,5 +53,6 @@ export function serializeMeta(meta: SketchMeta): string {
     lastUpdatedBy: meta.lastUpdatedBy,
   };
   if (meta.type !== "p5") ordered["type"] = meta.type;
+  if (meta.tags && meta.tags.length > 0) ordered["tags"] = meta.tags;
   return JSON.stringify(ordered, null, 2) + "\n";
 }
