@@ -13,6 +13,7 @@ import { slugify } from "../../scripts/lib/slug";
 import { SketchFormDialog, type SketchFormValues } from "./SketchFormDialog";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { SketchTypeLabel } from "./SketchTypeLabel";
+import { formatDate } from "../lib/format";
 
 const columnHelper = createColumnHelper<SketchMeta>();
 
@@ -98,8 +99,34 @@ export function SketchTable({ data }: { data: SketchMeta[] }) {
         header: "Type",
         cell: ({ getValue }) => <SketchTypeLabel type={getValue()} />,
       }),
-      columnHelper.accessor("dateCreated", { header: "Created" }),
-      columnHelper.accessor("dateUpdated", { header: "Updated" }),
+      columnHelper.accessor("tags", {
+        header: "Tags",
+        enableSorting: false,
+        cell: ({ getValue, row }) => {
+          const tags = getValue() ?? [];
+          const text = tags.join(", ");
+          return (
+            <span
+              className="block max-w-[160px] truncate text-accent"
+              title={row.original.tags?.join(", ")}
+            >
+              {text}
+            </span>
+          );
+        },
+      }),
+      columnHelper.accessor("dateCreated", {
+        header: "Created",
+        cell: ({ getValue }) => (
+          <span className="text-muted">{formatDate(getValue())}</span>
+        ),
+      }),
+      columnHelper.accessor("dateUpdated", {
+        header: "Updated",
+        cell: ({ getValue }) => (
+          <span className="text-muted">{formatDate(getValue())}</span>
+        ),
+      }),
       columnHelper.accessor("createdBy", { header: "Created by" }),
       columnHelper.accessor("lastUpdatedBy", { header: "Last updated by" }),
       columnHelper.display({
@@ -153,7 +180,7 @@ export function SketchTable({ data }: { data: SketchMeta[] }) {
     const res = await fetch(`/api/sketches/${sourceId}/duplicate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: values.name, id: values.id }),
+      body: JSON.stringify({ name: values.name, id: values.id, tags: values.tags }),
     });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error ?? "Failed to duplicate sketch");
@@ -161,7 +188,7 @@ export function SketchTable({ data }: { data: SketchMeta[] }) {
   }
 
   async function handleEdit(currentId: string, values: SketchFormValues) {
-    const body: Record<string, string> = { name: values.name, type: values.type };
+    const body: Record<string, unknown> = { name: values.name, type: values.type, tags: values.tags };
     if (values.id !== currentId) body.newId = values.id;
     const res = await fetch(`/api/sketches/${currentId}`, {
       method: "PATCH",
@@ -258,6 +285,7 @@ export function SketchTable({ data }: { data: SketchMeta[] }) {
             name: `${dialog.meta.name} - Copy`,
             id: slugify(`${dialog.meta.name} - Copy`),
             type: dialog.meta.type,
+            tags: dialog.meta.tags ?? [],
           }}
           onSubmit={(values) => handleDuplicate(dialog.meta.id, values)}
           onClose={() => setDialog({ type: "none" })}
@@ -273,6 +301,7 @@ export function SketchTable({ data }: { data: SketchMeta[] }) {
             name: dialog.meta.name,
             id: dialog.meta.id,
             type: dialog.meta.type,
+            tags: dialog.meta.tags ?? [],
           }}
           onSubmit={(values) => handleEdit(dialog.meta.id, values)}
           onClose={() => setDialog({ type: "none" })}

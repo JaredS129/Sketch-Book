@@ -9,6 +9,7 @@ export interface EditSketchOptions {
   name: string;
   newId?: string;
   type: SketchType;
+  tags?: string[];
 }
 
 /**
@@ -16,7 +17,7 @@ export interface EditSketchOptions {
  * folder is renamed atomically on the local filesystem before writing meta.
  * Preserves dateCreated, createdBy, dateUpdated, lastUpdatedBy.
  */
-export function editSketch({ id, name, newId, type }: EditSketchOptions): void {
+export function editSketch({ id, name, newId, type, tags }: EditSketchOptions): void {
   // Validate inputs
   const trimmedName = name.trim();
   if (!trimmedName) throw new Error("name is required");
@@ -50,5 +51,6 @@ export function editSketch({ id, name, newId, type }: EditSketchOptions): void {
     id: finalId,
     name: trimmedName,
     type,
+    ...(tags !== undefined ? { tags } : {}),
   });
 }

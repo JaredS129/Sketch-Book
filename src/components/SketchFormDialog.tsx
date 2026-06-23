@@ -3,6 +3,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { slugify, isValidSlug } from "../../scripts/lib/slug";
 import { SKETCH_TYPES, type SketchType } from "../../scripts/lib/meta";
 import { Button } from "./ui/Button";
+import { TagInput } from "./TagInput";
 
 export type FormMode = "create" | "duplicate" | "edit-full" | "edit-name-only";
 
@@ -10,6 +11,7 @@ export interface SketchFormValues {
   name: string;
   id: string;
   type: SketchType;
+  tags: string[];
 }
 
 interface Props {
@@ -39,11 +41,22 @@ export function SketchFormDialog({
   const [name, setName] = useState(initialValues?.name ?? "");
   const [id, setId] = useState(initialValues?.id ?? "");
   const [type, setType] = useState<SketchType>(initialValues?.type ?? "p5");
+  const [tags, setTags] = useState<string[]>(initialValues?.tags ?? []);
+  const [allTags, setAllTags] = useState<string[]>([]);
   const [slugDirty, setSlugDirty] = useState(
     mode === "edit-full" || mode === "duplicate" ? true : false,
   );
   const [serverError, setServerError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/tags")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setAllTags(data as string[]);
+      })
+      .catch(() => {});
+  }, []);
 
   const slugVisible = showSlug(mode);
   const typeVisible = showType(mode);
@@ -65,7 +78,7 @@ export function SketchFormDialog({
     setServerError("");
     setSubmitting(true);
     try {
-      await onSubmit({ name: name.trim(), id, type });
+      await onSubmit({ name: name.trim(), id, type, tags });
     } catch (err) {
       setServerError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -150,6 +163,17 @@ export function SketchFormDialog({
                 </select>
               </div>
             )}
+
+            {/* Tags */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-fg">Tags</label>
+              <TagInput
+                value={tags}
+                onChange={setTags}
+                allTags={allTags}
+                placeholder="Add tag…"
+              />
+            </div>
 
             {/* Server error */}
             {serverError && (

@@ -76,6 +76,7 @@ function main(): void {
     createdBy,
     lastUpdatedBy: createdBy,
     type: sourceMeta.type,
+    tags: sourceMeta.tags ?? [],
   };
 
   fs.cpSync(sourceDir, dir, { recursive: true });

@@ -15,7 +15,7 @@ export function HomePage() {
     const res = await fetch("/api/sketches", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: values.name, id: values.id, type: values.type }),
+      body: JSON.stringify({ name: values.name, id: values.id, type: values.type, tags: values.tags }),
     });
     const json = await res.json();
     if (!json.ok) throw new Error(json.error ?? "Failed to create sketch");

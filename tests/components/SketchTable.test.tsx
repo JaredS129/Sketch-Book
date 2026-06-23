@@ -13,6 +13,7 @@ const data: SketchMeta[] = [
     createdBy: "Ada Lovelace",
     lastUpdatedBy: "Grace Hopper",
     type: "p5",
+    tags: [],
   },
   {
     id: "particle-system",
@@ -22,6 +23,7 @@ const data: SketchMeta[] = [
     createdBy: "Alan Turing",
     lastUpdatedBy: "Alan Turing",
     type: "p5",
+    tags: [],
   },
 ];
 
@@ -38,8 +40,8 @@ describe("SketchTable", () => {
 
     // All five fields for the first sketch are present.
     expect(screen.getByText("Flow Field")).toBeInTheDocument();
-    expect(screen.getByText("2026-06-01")).toBeInTheDocument();
-    expect(screen.getByText("2026-06-10")).toBeInTheDocument();
+    expect(screen.getByText("1 June 2026")).toBeInTheDocument();
+    expect(screen.getByText("10 June 2026")).toBeInTheDocument();
     expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
     expect(screen.getByText("Grace Hopper")).toBeInTheDocument();
 

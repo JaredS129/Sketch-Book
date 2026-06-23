@@ -16,6 +16,12 @@ import {
 } from "../../scripts/lib/paths";
 import { readMeta, writeMeta } from "../../scripts/lib/meta-io";
 import { editSketch } from "../../scripts/lib/edit-sketch-op";
+import {
+  readTagRegistry,
+  writeTagRegistry,
+  mergeTags,
+  normaliseTags,
+} from "../../scripts/lib/tags";
 
 function json(res: ServerResponse, status: number, body: unknown) {
   const payload = JSON.stringify(body);
@@ -59,6 +65,11 @@ export function sketchApi(): Plugin {
         const url = req.url ?? "";
         const method = req.method ?? "";
 
+        // GET /api/tags — fetch tag registry
+        if (method === "GET" && url === "/api/tags") {
+          return json(res, 200, readTagRegistry());
+        }
+
         // POST /api/sketches — create
         if (method === "POST" && url === "/api/sketches") {
           try {
@@ -66,6 +77,7 @@ export function sketchApi(): Plugin {
             const name = typeof body.name === "string" ? body.name.trim() : "";
             const id = typeof body.id === "string" ? body.id.trim() : "";
             const type = body.type as string;
+            const rawTags = Array.isArray(body.tags) ? (body.tags as string[]) : [];
 
             if (!name) return err(res, 400, "name is required");
             if (!id) return err(res, 400, "id is required");
@@ -73,6 +85,12 @@ export function sketchApi(): Plugin {
               return err(res, 400, "invalid id: must be kebab-case slug");
             if (!(SKETCH_TYPES as readonly string[]).includes(type))
               return err(res, 400, "invalid type");
+
+            for (const tag of rawTags) {
+              if (/\s/.test(String(tag).trim()))
+                return err(res, 400, `tag '${tag}' must be a single word (no spaces)`);
+            }
+            const tags = normaliseTags(rawTags);
 
             const dir = sketchDir(id);
             if (fs.existsSync(dir))
@@ -94,6 +112,7 @@ export function sketchApi(): Plugin {
               createdBy,
               lastUpdatedBy: createdBy,
               type: type as SketchType,
+              tags,
             };
 
             fs.mkdirSync(dir, { recursive: true });
@@ -102,6 +121,7 @@ export function sketchApi(): Plugin {
               fs.copyFileSync(tmpl, `${dir}/${dest}`);
             }
             writeMeta(id, meta);
+            writeTagRegistry(mergeTags(readTagRegistry(), tags));
             return ok(res);
           } catch (e) {
             return err(res, 500, e instanceof Error ? e.message : "Unknown error");
@@ -131,6 +151,16 @@ export function sketchApi(): Plugin {
               return err(res, 400, `sketch '${id}' already exists`);
 
             const sourceMeta = readMeta(sourceId);
+            const rawTags = Array.isArray(body.tags)
+              ? (body.tags as string[])
+              : sourceMeta.tags ?? [];
+
+            for (const tag of rawTags) {
+              if (/\s/.test(String(tag).trim()))
+                return err(res, 400, `tag '${tag}' must be a single word (no spaces)`);
+            }
+            const tags = normaliseTags(rawTags);
+
             let createdBy: string;
             try {
               createdBy = getGitUserName();
@@ -147,10 +177,12 @@ export function sketchApi(): Plugin {
               createdBy,
               lastUpdatedBy: createdBy,
               type: sourceMeta.type,
+              tags,
             };
 
             fs.cpSync(sourceDir, destDir, { recursive: true });
             writeMeta(id, meta);
+            writeTagRegistry(mergeTags(readTagRegistry(), tags));
             return ok(res);
           } catch (e) {
             return err(res, 500, e instanceof Error ? e.message : "Unknown error");
@@ -167,6 +199,7 @@ export function sketchApi(): Plugin {
             const type = body.type as string;
             const newId =
               typeof body.newId === "string" ? body.newId.trim() : undefined;
+            const rawTags = Array.isArray(body.tags) ? (body.tags as string[]) : [];
 
             if (!name) return err(res, 400, "name is required");
             if (!(SKETCH_TYPES as readonly string[]).includes(type))
@@ -174,7 +207,14 @@ export function sketchApi(): Plugin {
             if (newId !== undefined && !isValidSlug(newId))
               return err(res, 400, "invalid newId: must be kebab-case slug");
 
-            editSketch({ id, name, newId, type: type as SketchType });
+            for (const tag of rawTags) {
+              if (/\s/.test(String(tag).trim()))
+                return err(res, 400, `tag '${tag}' must be a single word (no spaces)`);
+            }
+            const tags = normaliseTags(rawTags);
+
+            editSketch({ id, name, newId, type: type as SketchType, tags });
+            writeTagRegistry(mergeTags(readTagRegistry(), tags));
             return ok(res);
           } catch (e) {
             const msg = e instanceof Error ? e.message : "Unknown error";

@@ -5,5 +5,9 @@
   "dateUpdated": "2026-06-22",
   "createdBy": "Jared Stevenson",
   "lastUpdatedBy": "Jared Stevenson",
-  "type": "q5play"
+  "type": "q5play",
+  "tags": [
+    "example",
+    "simulation"
+  ]
 }
