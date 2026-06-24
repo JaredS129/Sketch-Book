@@ -8,9 +8,13 @@ import type p5 from "p5";
  * (setup, draw, and optionally preload, windowResized, …) to `p`.
  * Do NOT use p5 global mode — multiple sketches share one app.
  */
+
+let canvasWidth = 800;
+let canvasHeight = 800;
+
 export default function sketch(p: p5): void {
   p.setup = () => {
-    p.createCanvas(800, 800);
+    p.createCanvas(canvasWidth, canvasHeight);
   };
 
   function amorphCirc(x, y, rad, res, r, g, b, size) {
@@ -18,10 +22,39 @@ export default function sketch(p: p5): void {
     p.noFill();
     p.strokeWeight(2);
     for (let i = 0; i < res * 3; i++) {
-      p.circle(
-        x + rad * p.cos(p.map(i, 0, res, 0, 360)),
-        y + rad * p.sin(p.map(i, 0, res, 0, 360)),
-        size + i,
+      if (i >= 40) {
+        p.circle(
+          x + rad * p.cos(p.map(i, 0, res, 0, 360)),
+          y + rad * p.sin(p.map(i, 0, res, 0, 360)),
+          size + i * p.random(0, 2),
+        );
+      } else {
+        p.circle(
+          x + rad * p.cos(p.map(i, 0, res, 0, 360)),
+          y + rad * p.sin(p.map(i, 0, res, 0, 360)),
+          size + i,
+        );
+      }
+    }
+  }
+
+  function glitchSlices() {
+    for (let i = 0; i < 10; i++) {
+      let y = p.random(canvasHeight);
+      let h = p.random(2, 30);
+
+      let offset = p.random(-100, 100);
+
+      p.copy(
+        0,
+        y,
+        canvasWidth,
+        h,
+
+        offset,
+        y,
+        canvasWidth,
+        h,
       );
     }
   }
@@ -49,6 +82,28 @@ export default function sketch(p: p5): void {
       );
     }
 
+    rgbGlitch();
     p.noLoop();
   };
+
+  function rgbGlitch() {
+    let frame = p.get();
+
+    p.blendMode(p.ADD);
+
+    // Red
+    p.tint(255, 0, 0, 100);
+    p.image(frame, -5, 0);
+
+    // Green
+    p.tint(0, 255, 0, 100);
+    p.image(frame, 0, 0);
+
+    // Blue
+    p.tint(0, 0, 255, 100);
+    p.image(frame, 5, 0);
+
+    p.noTint();
+    p.blendMode(p.BLEND);
+  }
 }
