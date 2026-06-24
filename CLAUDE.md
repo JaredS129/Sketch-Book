@@ -1,9 +1,19 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-`specs/004-sketch-tags/plan.md`
+`specs/005-sketch-table-filtering/plan.md`
 
-Active feature: **Sketch Tags** (`004-sketch-tags`)
+Active feature: **Sketch Table Filtering & Search** (`005-sketch-table-filtering`)
+Adds four live-filter controls above the gallery table on `HomePage`: name search (substring,
+case-insensitive), type multi-select dropdown (OR logic), tag filter with autocomplete (AND
+logic, restricted to existing tags), and author multi-select dropdown (OR logic). All filters
+combine with AND across filter types. A single "Clear" button resets all filters. Implemented
+via: new `src/hooks/useSketchFilter.ts` (state + filter logic), new `MultiSelectDropdown`
+(Radix Popover + checkboxes), new `SketchFilterBar`, and minor additions to `TagInput`
+(`restrictToExisting`, `showAllWhenFocused` props). `SketchTable` and API unchanged.
+See plan.md, data-model.md, contracts/filter-ui-contract.md.
+
+Previous feature: **Sketch Tags** (`004-sketch-tags`)
 Adds a `tags` field (array of lowercase single-word strings) to `SketchMeta`. Gallery gains a
 Tags column with ellipsis truncation and hover tooltip. Sketch page metadata panel shows tags.
 All forms (create/duplicate/edit) include a `TagInput` chip-and-autocomplete component backed
