@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://p5js-sketch-server/contracts/sketch-meta.schema.json",
+  "$id": "https://Sketch-Book/contracts/sketch-meta.schema.json",
   "title": "SketchMeta",
   "description": "Per-sketch metadata stored at sketches/<id>/meta.json. Written by CLI scripts, read by the view-only UI. No database.",
   "type": "object",
