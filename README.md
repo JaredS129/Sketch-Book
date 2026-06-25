@@ -1,6 +1,6 @@
-# p5.js Sketch Gallery & Local Dev Server
+# p5.js and q5.js Sketch Gallery & Local Dev Server
 
-A local, hot-reloadable web app that auto-discovers your p5.js sketches from disk,
+A local, hot-reloadable web app that auto-discovers your p5.js and q5.js sketches from disk,
 lists them in a dark, modern table, and runs any sketch on its own routed page.
 The UI is **view-only** — all create/update/delete happens through CLI scripts.
 No database: each sketch's metadata lives in a per-sketch `meta.json`.
