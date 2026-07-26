@@ -34,7 +34,7 @@ export default function sketch(p: p5): void {
 
         p.push();
         p.translate(x * vecSize, y * vecSize);
-        p.line(vecSize * 0.5, 0, v.x * vecSize + vecSize * 0.5, v.y * vecSize);
+        p.circle(vecSize * 0.5, 0, v.x * vecSize + vecSize * 0.5, v.y * vecSize);
         p.pop();
 
         xOff += noiseInc;
@@ -46,6 +46,8 @@ export default function sketch(p: p5): void {
   p.draw = () => {
     p.background(20);
     p.stroke(220);
+    p.fill(220);
+    // p.noFill();
     drawVectors(p.width, p.height, p.frameCount * 0.01);
     // p.noLoop();
   };
