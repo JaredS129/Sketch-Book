@@ -45,10 +45,10 @@ export default function sketch(p: p5): void {
 
   p.draw = () => {
     p.background(20);
-    p.stroke(220);
-    p.fill(220);
-    // p.noFill();
-    drawVectors(p.width, p.height, p.frameCount * 0.01);
+    p.stroke(30);
+    // p.fill(30);
+      
+    drawVectors(p.width, p.height, p.frameCount * 0.005);
     // p.noLoop();
   };
 }
